@@ -181,8 +181,16 @@ module ActiveMerchant #:nodoc:
         post[:account_type] = check.account_type # The customer's type of ACH account
       end
       
-      def add_sku(post,options)
-        post["product_sku_#"] = options[:sku] || options["product_sku_#"]
+      # def add_sku(post,options)
+      #   post["product_sku_#"] = options[:sku] || options["product_sku_#"]
+      # end
+      
+      def add_sku(post, options)
+        post[:product_sku_1] = options[:sku] || options[:product_sku_1]
+      end
+      
+      def add_start_date(post, options)
+        post[:start_date] = options["start_date"] || (Time.now + 1.day).localtime.strftime("%Y%m%d")
       end
       
       def add_transaction(post, auth)
@@ -192,7 +200,7 @@ module ActiveMerchant #:nodoc:
       def parse(body)
         results = {}
         body.split(/&/).each do |pair|
-          key,val = pair.split(/=/)
+          key,val = pair.split('=')
           results[key] = val
         end
         
@@ -201,6 +209,10 @@ module ActiveMerchant #:nodoc:
       
       def commit(action, money, parameters)
         parameters[:amount]  = amount(money) if money
+        
+        require 'logger'
+        Logger.new("/tmp/smart_ps.log").info("smart_ps.rb: commit() parameters[:amount]=#{amount(money)}\naction=#{action}\nparameters=#{parameters.to_yaml}")
+
         response = parse( ssl_post(api_url, post_data(action,parameters)) )
         Response.new(response["response"] == "1", message_from(response), response, 
           :authorization => response["transactionid"],
@@ -208,7 +220,6 @@ module ActiveMerchant #:nodoc:
           :cvv_result => response["cvvresponse"],
           :avs_result => { :code => response["avsresponse"] }
         )
-        
       end
       
       def expdate(creditcard)

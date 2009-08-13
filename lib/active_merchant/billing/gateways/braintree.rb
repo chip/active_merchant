@@ -7,9 +7,6 @@ module ActiveMerchant #:nodoc:
       end
       
       def add_recurring(money, creditcard, options = {})
-        require 'logger'
-        logger = Logger.new("/tmp/smart_ps.log")
-        
         post = {}
         add_invoice(post, options)
         add_payment_source(post, creditcard,options)        
@@ -18,8 +15,6 @@ module ActiveMerchant #:nodoc:
         add_customer_data(post, options)
         add_start_date(post, options)
         add_sku(post, options)
-        logger.info "post=#{post}\nmoney=#{money}\ncreditcard=#{creditcard}\noptions=#{options.to_yaml}"
-        
         commit('add_recurring', money, post)
       end
       self.supported_countries = ['US']

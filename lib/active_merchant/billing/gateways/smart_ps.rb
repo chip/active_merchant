@@ -181,10 +181,6 @@ module ActiveMerchant #:nodoc:
         post[:account_type] = check.account_type # The customer's type of ACH account
       end
       
-      # def add_sku(post,options)
-      #   post["product_sku_#"] = options[:sku] || options["product_sku_#"]
-      # end
-      
       def add_sku(post, options)
         post[:product_sku_1] = options[:sku] || options[:product_sku_1]
       end
@@ -209,10 +205,6 @@ module ActiveMerchant #:nodoc:
       
       def commit(action, money, parameters)
         parameters[:amount]  = amount(money) if money
-        
-        require 'logger'
-        Logger.new("/tmp/smart_ps.log").info("smart_ps.rb: commit() parameters[:amount]=#{amount(money)}\naction=#{action}\nparameters=#{parameters.to_yaml}")
-
         response = parse( ssl_post(api_url, post_data(action,parameters)) )
         Response.new(response["response"] == "1", message_from(response), response, 
           :authorization => response["transactionid"],
